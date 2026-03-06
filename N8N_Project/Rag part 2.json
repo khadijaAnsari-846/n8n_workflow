@@ -1,0 +1,195 @@
+{
+  "name": "Rag part 2",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -80,
+        -160
+      ],
+      "id": "008d6806-a107-462d-bd72-66ae3d43f8ec",
+      "name": "When chat message received",
+      "webhookId": "f60e3e20-8078-4782-b81b-6736db1e5396"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        32
+      ],
+      "id": "505fa3cf-76f8-4dcd-a778-9da7f0815472",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        352,
+        240
+      ],
+      "id": "d3cea073-b376-4a53-9e72-8b8e8d8bacc0",
+      "name": "Embeddings HuggingFace Inference1",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "B4N6bYTdlZHq2boy",
+          "name": "HuggingfaceN8NA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "You are a Professional Retrieval Assistant. Your primary goal is to provide accurate answers based ONLY on the documents available in the <Tool Name>.\n\nRetrieval Instructions:\n\nSearch First: For every user query, you must first call the <Tool Name> tool.\n\nNo Assumptions: Do not use your internal training data to answer. If the information is not in the retrieved documents, state: \"I'm sorry, I cannot find that information in the provided documentation.\"\n\nContextual Accuracy: If multiple documents are found, synthesize them into a clear, cohesive answer.\n\nCitation (Optional): If metadata is available, mention the source file name at the end of your response.\n\nStrict Rules:\n\nNever invent facts.\n\nIf the user's question is unrelated to the documents, politely ask them to keep questions relevant to the knowledge base.",
+        "memoryKey": {
+          "__rl": true,
+          "value": "embeded_doc_database",
+          "mode": "id"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        80
+      ],
+      "id": "2bfc1af3-908e-4d64-a297-151efbf103e2",
+      "name": "Simple Vector Store1"
+    },
+    {
+      "parameters": {
+        "content": "Reterival and Augmenation and Query",
+        "height": 80,
+        "width": 304,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        48,
+        -320
+      ],
+      "typeVersion": 1,
+      "id": "8085eade-23a3-456b-b37e-d7e0ad12a58f",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant\"You are a specialized assistant for Nate's AI Automation Society.\n\nCRITICAL INSTRUCTION: > Whenever a user asks a question, you MUST first use the vector_store_tool to search for relevant documents. Do not say you don't have data until you have called this tool."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        96,
+        -160
+      ],
+      "id": "547b726a-ee9c-4b91-b0d3-a9316ce7724b",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -48,
+        48
+      ],
+      "id": "6dbaf646-73d6-464b-a298-9753235284c7",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "NrtHodgfSGkS3iRg",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "71f5e803-e72b-45a5-8bc0-2aec5603733f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "518fc42eb9f4042ec5bb1343b736a383808ff94da3085830d96818c74878a9e1"
+  },
+  "id": "Mh6gsUVjT9reyfTf",
+  "tags": []
+}

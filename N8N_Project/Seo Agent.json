@@ -1,0 +1,330 @@
+{
+  "name": "Seo Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1456,
+        -80
+      ],
+      "id": "e7f434b2-2a16-4aeb-8a23-25624fe15516",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1vzj9U_zK3Rbr3Pr5Pu_-k9CLgt70d4TehdNwOXkSdDM",
+          "mode": "list",
+          "cachedResultName": "AI Content Generation - Public",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vzj9U_zK3Rbr3Pr5Pu_-k9CLgt70d4TehdNwOXkSdDM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1996041944,
+          "mode": "list",
+          "cachedResultName": "Content-generation-topics",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vzj9U_zK3Rbr3Pr5Pu_-k9CLgt70d4TehdNwOXkSdDM/edit#gid=1996041944"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "Pending"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1232,
+        -80
+      ],
+      "id": "df9e4492-4b04-4a92-931c-3b8e617d6d58",
+      "name": "Fetch the topics",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bAOU4xpBUVoiw18F",
+          "name": "Blog_google_sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1vzj9U_zK3Rbr3Pr5Pu_-k9CLgt70d4TehdNwOXkSdDM",
+          "mode": "list",
+          "cachedResultName": "AI Content Generation - Public",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vzj9U_zK3Rbr3Pr5Pu_-k9CLgt70d4TehdNwOXkSdDM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1981161431,
+          "mode": "list",
+          "cachedResultName": "AI-Prompts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vzj9U_zK3Rbr3Pr5Pu_-k9CLgt70d4TehdNwOXkSdDM/edit#gid=1981161431"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1040,
+        -80
+      ],
+      "id": "39779f3f-2dde-4f92-bceb-1da25a4e522e",
+      "name": "Take a dynamic Prompts",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bAOU4xpBUVoiw18F",
+          "name": "Blog_google_sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "for item in _items:\n    # 1. Access the data inside the 'json' object of the current item\n    data = item.get(\"json\", {})\n    \n    # 2. Get the prompts (assuming they are coming from the same input)\n    system_prompt = data.get(\"System Prompt\", \"\")\n    user_prompt = data.get(\"User Prompt\", \"\")\n    \n    # 3. Create a dictionary of replacements\n    # Using .get() ensures that if 'domain_niche' is missing, it returns an empty string instead of crashing\n    replacements = {\n        \"{{domain_niche}}\": str(data.get(\"domain_niche\", \"\")),\n        \"{{topic}}\": str(data.get(\"topic\", \"\")),\n        \"{{word_count}}\": str(data.get(\"word_count\", \"\")),\n        \"{{tone}}\": str(data.get(\"tone\", \"\")),\n        \"{{audience}}\": str(data.get(\"audience\", \"\"))\n    }\n\n    # 4. Perform the replacements\n    for placeholder, value in replacements.items():\n        system_prompt = system_prompt.replace(placeholder, value)\n        user_prompt = user_prompt.replace(placeholder, value)\n\n    # 5. Output the cleaned strings back into the node\n    item[\"json\"][\"final_system_prompt\"] = system_prompt\n    item[\"json\"][\"final_user_prompt\"] = user_prompt\n\nreturn _items"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -832,
+        -80
+      ],
+      "id": "cb40d923-2c06-4e2a-aef8-bed1f890e10a",
+      "name": "Code in Python"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0706382a-7bbc-445a-adb6-41e655756366",
+              "leftValue": "={{ $json['Content Platform'] }}",
+              "rightValue": "Wordpress",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -608,
+        -80
+      ],
+      "id": "434bcc2a-e05b-47ad-85b5-3f2825559eae",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "={{ $json['System Prompt'] }}"
+            },
+            {
+              "content": "={{ $json['User Prompt'] }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -400,
+        -384
+      ],
+      "id": "0e8553ef-b65c-4dbe-8723-7a3d57476167",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "NrtHodgfSGkS3iRg",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1vzj9U_zK3Rbr3Pr5Pu_-k9CLgt70d4TehdNwOXkSdDM",
+          "mode": "list",
+          "cachedResultName": "AI Content Generation - Public",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vzj9U_zK3Rbr3Pr5Pu_-k9CLgt70d4TehdNwOXkSdDM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2,
+          "mode": "list",
+          "cachedResultName": "Blog_writing_sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vzj9U_zK3Rbr3Pr5Pu_-k9CLgt70d4TehdNwOXkSdDM/edit#gid=2"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Blog Content": "={{ $json.output[0].content }}",
+            "Id": "={{ $json.output[0].id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Id",
+              "displayName": "Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Blog Content",
+              "displayName": "Blog Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        16,
+        -384
+      ],
+      "id": "7ae8215e-d326-4d8d-a354-5b495ea37811",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bAOU4xpBUVoiw18F",
+          "name": "Blog_google_sheet"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Fetch the topics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch the topics": {
+      "main": [
+        [
+          {
+            "node": "Take a dynamic Prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Take a dynamic Prompts": {
+      "main": [
+        [
+          {
+            "node": "Code in Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "57f11a57-5f40-4104-98f8-1bc373883ee5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "518fc42eb9f4042ec5bb1343b736a383808ff94da3085830d96818c74878a9e1"
+  },
+  "id": "T632g8aWLtIjfZcW",
+  "tags": []
+}
